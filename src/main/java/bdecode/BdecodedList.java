@@ -16,7 +16,7 @@ public class BdecodedList implements BdecodedObject{
         for(BdecodedObject object : data) {
             length += object.stringLength();
         }
-        return length+1;
+        return length+2;
     }
 
 

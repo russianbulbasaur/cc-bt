@@ -4,7 +4,9 @@ import com.google.gson.Gson;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Bdecoder {
 
@@ -21,7 +23,7 @@ public class Bdecoder {
                 case 'l':
                     return decodeList(encoded);
                 case 'd':
-                    break;
+                    return decodeDictionary(encoded);
             }
         }catch(BdecoderException e) {
             System.out.println(e.getMessage());
@@ -49,7 +51,14 @@ public class Bdecoder {
 
 
     private BdecodedInteger decodeInteger(String encoded) {
-        return new BdecodedInteger(new BigInteger(encoded.substring(1,encoded.length()-1)));
+        StringBuilder b = new StringBuilder();
+        for(int i=1;i<encoded.length();i++) {
+            char c = encoded.charAt(i);
+            if(Character.isDigit(c)){
+                b.append(c);
+            }else if (c == 'e') break;
+        }
+        return new BdecodedInteger(new BigInteger(b.toString()));
     }
 
     private BdecodedList decodeList(String encoded) {
@@ -59,11 +68,27 @@ public class Bdecoder {
             BdecodedObject object = decode(encoded.substring(i));
             i += object.stringLength();
             list.add(object);
+            if(encoded.charAt(i) == 'e') break;
         }
         return new BdecodedList(list);
     }
 
 
-
-
+    private BdecodedDictionary decodeDictionary(String encoded) throws BdecoderException{
+        Map<String,BdecodedObject> map = new HashMap<>();
+        int i = 1;
+        while(i<encoded.length()) {
+            BdecodedObject keyObject = decode(encoded.substring(i));
+            if(keyObject.type()!=BdecodedObjectType.string) {
+                throw new BdecoderException("expected a string key");
+            }
+            String key = (String)keyObject.toJavaObject();
+            i += keyObject.stringLength();
+            BdecodedObject value = decode(encoded.substring(i));
+            i += value.stringLength();
+            map.put(key,value);
+            if(encoded.charAt(i) == 'e') break;
+        }
+        return new BdecodedDictionary(map);
+    }
 }
