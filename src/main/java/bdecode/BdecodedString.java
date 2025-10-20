@@ -13,13 +13,14 @@ public class BdecodedString implements BdecodedObject{
         return data.length() + String.valueOf(data.length()).length() + 1;
     }
 
-    @Override
-    public Object data() {
-        return data;
-    }
 
     @Override
     public BdecodedObjectType type() {
         return BdecodedObjectType.string;
+    }
+
+    @Override
+    public Object toJavaObject() {
+        return data;
     }
 }

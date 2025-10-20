@@ -7,32 +7,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Bdecoder {
-    private static final Gson gson = new Gson();
+
 
     public BdecodedObject decode(String encoded) {
-        BdecodedObject result = null;
         try {
             char c = encoded.charAt(0);
             if (Character.isDigit(c)) {
-                result = decodeString(encoded);
+                return decodeString(encoded);
             }
             switch (c){
                 case 'i':
-                    result = decodeInteger(encoded);
+                    return decodeInteger(encoded);
                 case 'l':
-                    result = decodeList(encoded);
-                    break;
+                    return decodeList(encoded);
                 case 'd':
                     break;
             }
-            if(result == null) {
-                throw new BdecoderException(String.format("invalid format: %s",encoded));
-            }
-            printJson(result);
         }catch(BdecoderException e) {
             System.out.println(e.getMessage());
         }
-        return result;
+        return null;
     }
 
     public BdecodedString decodeString(String encoded) throws BdecoderException {
@@ -69,9 +63,7 @@ public class Bdecoder {
         return new BdecodedList(list);
     }
 
-    private void printJson(Object output) {
-        System.out.println(gson.toJson(output));
-    }
+
 
 
 }

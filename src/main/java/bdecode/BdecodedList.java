@@ -1,5 +1,6 @@
 package bdecode;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class BdecodedList implements BdecodedObject{
@@ -18,13 +19,18 @@ public class BdecodedList implements BdecodedObject{
         return length+1;
     }
 
-    @Override
-    public Object data() {
-        return data;
-    }
 
     @Override
     public BdecodedObjectType type() {
         return BdecodedObjectType.list;
+    }
+
+    @Override
+    public Object toJavaObject() {
+        List<Object> data = new ArrayList<>();
+        for(BdecodedObject object : this.data) {
+            data.add(object.toJavaObject());
+        }
+        return data;
     }
 }

@@ -14,12 +14,12 @@ public class BdecodedInteger implements BdecodedObject{
     }
 
     @Override
-    public Object data() {
-        return data;
+    public BdecodedObjectType type() {
+        return BdecodedObjectType.integer;
     }
 
     @Override
-    public BdecodedObjectType type() {
-        return BdecodedObjectType.integer;
+    public Object toJavaObject() {
+        return data;
     }
 }
