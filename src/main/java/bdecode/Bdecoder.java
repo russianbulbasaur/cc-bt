@@ -1,14 +1,16 @@
-package bencode;
+package bdecode;
 
 import com.google.gson.Gson;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Bdecoder {
     private static final Gson gson = new Gson();
 
-    public void decode(String encoded) {
-        Object result = null;
+    public BdecodedObject decode(String encoded) {
+        BdecodedObject result = null;
         try {
             char c = encoded.charAt(0);
             if (Character.isDigit(c)) {
@@ -18,6 +20,7 @@ public class Bdecoder {
                 case 'i':
                     result = decodeInteger(encoded);
                 case 'l':
+                    result = decodeList(encoded);
                     break;
                 case 'd':
                     break;
@@ -29,9 +32,10 @@ public class Bdecoder {
         }catch(BdecoderException e) {
             System.out.println(e.getMessage());
         }
+        return result;
     }
 
-    public String decodeString(String encoded) throws BdecoderException {
+    public BdecodedString decodeString(String encoded) throws BdecoderException {
         StringBuilder buffer = new StringBuilder();
         int i = 0;
         for(;i<encoded.length();i++) {
@@ -46,16 +50,28 @@ public class Bdecoder {
             }
         }
         int length = Integer.parseInt(buffer.toString());
-        return encoded.substring(i,i+length);
+        return new BdecodedString(encoded.substring(i,i+length));
     }
 
 
-    private BigInteger decodeInteger(String encoded) {
-        return new BigInteger(encoded.substring(1,encoded.length()-1));
+    private BdecodedInteger decodeInteger(String encoded) {
+        return new BdecodedInteger(new BigInteger(encoded.substring(1,encoded.length()-1)));
     }
 
+    private BdecodedList decodeList(String encoded) {
+        List<BdecodedObject> list = new ArrayList<>();
+        int i = 1;
+        while(i<encoded.length()) {
+            BdecodedObject object = decode(encoded.substring(i));
+            i += object.stringLength();
+            list.add(object);
+        }
+        return new BdecodedList(list);
+    }
 
     private void printJson(Object output) {
         System.out.println(gson.toJson(output));
     }
+
+
 }

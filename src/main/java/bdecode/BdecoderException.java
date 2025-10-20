@@ -1,4 +1,4 @@
-package bencode;
+package bdecode;
 
 public class BdecoderException extends Exception {
     private String message;
