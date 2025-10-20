@@ -2,6 +2,8 @@ package bencode;
 
 import com.google.gson.Gson;
 
+import java.math.BigInteger;
+
 public class Bdecoder {
     private static final Gson gson = new Gson();
 
@@ -47,8 +49,8 @@ public class Bdecoder {
     }
 
 
-    private int decodeInteger(String encoded) throws BdecoderException {
-        return Integer.parseInt(encoded.substring(1,encoded.length()-1));
+    private BigInteger decodeInteger(String encoded) {
+        return new BigInteger(encoded.substring(1,encoded.length()-1));
     }
 
 
