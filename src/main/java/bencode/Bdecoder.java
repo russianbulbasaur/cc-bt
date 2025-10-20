@@ -1,26 +1,32 @@
 package bencode;
 
-public class Bdecoder {
+import com.google.gson.Gson;
 
-    public String decode(String encoded) {
+public class Bdecoder {
+    private static final Gson gson = new Gson();
+
+    public void decode(String encoded) {
+        Object result = null;
         try {
             char c = encoded.charAt(0);
             if (Character.isDigit(c)) {
-                return decodeString(encoded);
+                result = decodeString(encoded);
             }
             switch (c){
                 case 'i':
-                    return String.valueOf(decodeInteger(encoded));
+                    result = decodeInteger(encoded);
                 case 'l':
                     break;
                 case 'd':
                     break;
             }
-            throw new BdecoderException(String.format("invalid format: %s",encoded));
+            if(result == null) {
+                throw new BdecoderException(String.format("invalid format: %s",encoded));
+            }
+            printJson(result);
         }catch(BdecoderException e) {
             System.out.println(e.getMessage());
         }
-        return "";
     }
 
     public String decodeString(String encoded) throws BdecoderException {
@@ -43,5 +49,10 @@ public class Bdecoder {
 
     private int decodeInteger(String encoded) throws BdecoderException {
         return Integer.parseInt(encoded.substring(1,encoded.length()-1));
+    }
+
+
+    private void printJson(Object output) {
+        System.out.println(gson.toJson(output));
     }
 }
