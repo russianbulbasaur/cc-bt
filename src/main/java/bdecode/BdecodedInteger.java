@@ -22,4 +22,16 @@ public class BdecodedInteger implements BdecodedObject{
     public Object toJavaObject() {
         return data;
     }
+
+    @Override
+    public Object data() {
+        return data;
+    }
+
+    @Override
+    public String bencode() {
+        return 'i' +
+                data.toString() +
+                'e';
+    }
 }

@@ -1,12 +1,13 @@
 package bdecode;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class BdecodedDictionary implements BdecodedObject {
 
-    Map<String,BdecodedObject> data;
+    public LinkedHashMap<String,BdecodedObject> data;
 
-     BdecodedDictionary(Map<String,BdecodedObject> data){
+     BdecodedDictionary(LinkedHashMap<String,BdecodedObject> data){
          this.data = data;
      }
 
@@ -31,5 +32,22 @@ public class BdecodedDictionary implements BdecodedObject {
             result.put(key,data.get(key).toJavaObject());
         }
         return result;
+    }
+
+    @Override
+    public Object data() {
+        return data;
+    }
+
+    @Override
+    public String bencode() {
+         StringBuilder output = new StringBuilder();
+         output.append('d');
+         for(String key : data.keySet()) {
+             output.append((new BdecodedString(key)).bencode());
+             output.append(data.get(key).bencode());
+         }
+         output.append('e');
+         return output.toString();
     }
 }

@@ -1,5 +1,6 @@
 package bdecode;
 import java.math.*;
+import java.nio.charset.StandardCharsets;
 
 public class BdecodedString implements BdecodedObject{
     String data;
@@ -22,5 +23,18 @@ public class BdecodedString implements BdecodedObject{
     @Override
     public Object toJavaObject() {
         return data;
+    }
+
+    @Override
+    public Object data() {
+        return data;
+    }
+
+    @Override
+    public String bencode() {
+        byte[] bytes = data.getBytes(StandardCharsets.ISO_8859_1);
+        return String.valueOf(bytes.length) +
+                ':' +
+                new String(bytes,StandardCharsets.ISO_8859_1);
     }
 }

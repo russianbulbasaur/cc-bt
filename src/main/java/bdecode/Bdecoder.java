@@ -1,19 +1,18 @@
 package bdecode;
 
 import com.google.gson.Gson;
+import utils.ByteSlice;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 public class Bdecoder {
 
 
-    public BdecodedObject decode(String encoded) {
+    public BdecodedObject decode(byte[] encoded) {
         try {
-            char c = encoded.charAt(0);
+            char c = (char) encoded[0];
             if (Character.isDigit(c)) {
                 return decodeString(encoded);
             }
@@ -31,11 +30,11 @@ public class Bdecoder {
         return null;
     }
 
-    public BdecodedString decodeString(String encoded) throws BdecoderException {
+    public BdecodedString decodeString(byte[] encoded) throws BdecoderException {
         StringBuilder buffer = new StringBuilder();
         int i = 0;
-        for(;i<encoded.length();i++) {
-            char c = encoded.charAt(i);
+        for(;i<encoded.length;i++) {
+            char c = (char)encoded[i];
             if(Character.isDigit(c)){
                 buffer.append(c);
             }else if (c == ':'){
@@ -46,48 +45,50 @@ public class Bdecoder {
             }
         }
         int length = Integer.parseInt(buffer.toString());
-        return new BdecodedString(encoded.substring(i,i+length));
+        return new BdecodedString(new String(ByteSlice.slice(encoded, i, i + length), StandardCharsets.ISO_8859_1));
     }
 
 
-    private BdecodedInteger decodeInteger(String encoded) {
-        StringBuilder b = new StringBuilder();
-        for(int i=1;i<encoded.length();i++) {
-            char c = encoded.charAt(i);
-            if(Character.isDigit(c)){
-                b.append(c);
-            }else if (c == 'e') break;
+    private BdecodedInteger decodeInteger(byte[] encoded) {
+        int end = -1;
+        for(int i=1;i<encoded.length;i++) {
+            byte c = encoded[i];
+            if (c == 'e'){
+                end = i;
+                break;
+            }
         }
-        return new BdecodedInteger(new BigInteger(b.toString()));
+        return new BdecodedInteger(new BigInteger(new String(ByteSlice.slice(encoded,1,end))));
     }
 
-    private BdecodedList decodeList(String encoded) {
+    private BdecodedList decodeList(byte[] encoded) {
         List<BdecodedObject> list = new ArrayList<>();
         int i = 1;
-        while(i<encoded.length()) {
-            BdecodedObject object = decode(encoded.substring(i));
+        while(i<encoded.length) {
+            BdecodedObject object = decode(ByteSlice.slice(encoded,i));
             i += object.stringLength();
             list.add(object);
-            if(encoded.charAt(i) == 'e') break;
+            if(encoded[i] == 'e') break;
         }
         return new BdecodedList(list);
     }
 
 
-    private BdecodedDictionary decodeDictionary(String encoded) throws BdecoderException{
-        Map<String,BdecodedObject> map = new HashMap<>();
+    private BdecodedDictionary decodeDictionary(byte[] encoded) throws BdecoderException{
+        LinkedHashMap<String,BdecodedObject> map = new LinkedHashMap<>();
         int i = 1;
-        while(i<encoded.length()) {
-            BdecodedObject keyObject = decode(encoded.substring(i));
+        while(i<encoded.length) {
+            BdecodedObject keyObject = decode(ByteSlice.slice(encoded,i));
+            if(keyObject==null) break;
             if(keyObject.type()!=BdecodedObjectType.string) {
                 throw new BdecoderException("expected a string key");
             }
             String key = (String)keyObject.toJavaObject();
             i += keyObject.stringLength();
-            BdecodedObject value = decode(encoded.substring(i));
+            BdecodedObject value = decode(ByteSlice.slice(encoded,i));
             i += value.stringLength();
             map.put(key,value);
-            if(encoded.charAt(i) == 'e') break;
+            if(encoded[i] == 'e') break;
         }
         return new BdecodedDictionary(map);
     }

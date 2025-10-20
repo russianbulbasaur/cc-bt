@@ -33,4 +33,20 @@ public class BdecodedList implements BdecodedObject{
         }
         return data;
     }
+
+    @Override
+    public Object data() {
+        return data;
+    }
+
+    @Override
+    public String bencode() {
+        StringBuilder output = new StringBuilder();
+        output.append('l');
+        for(BdecodedObject object : data) {
+            output.append(object.bencode());
+        }
+        output.append('e');
+        return output.toString();
+    }
 }
