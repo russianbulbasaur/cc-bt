@@ -39,6 +39,7 @@ public class Bdecoder {
             if(Character.isDigit(c)){
                 buffer.append(c);
             }else if (c == ':'){
+                i++;
                 break;
             }else{
                 throw new BdecoderException(String.format("invalid encoded bstring: %s",encoded));
