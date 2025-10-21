@@ -45,7 +45,7 @@ public class Bdecoder {
             }
         }
         int length = Integer.parseInt(buffer.toString());
-        return new BdecodedString(new String(ByteSlice.slice(encoded, i, i + length), StandardCharsets.ISO_8859_1));
+        return new BdecodedString(ByteSlice.slice(encoded, i, i + length));
     }
 
 

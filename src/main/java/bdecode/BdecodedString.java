@@ -3,15 +3,15 @@ import java.math.*;
 import java.nio.charset.StandardCharsets;
 
 public class BdecodedString implements BdecodedObject{
-    String data;
+    byte[] data;
 
-    BdecodedString(String s) {
-        this.data = s;
+    BdecodedString(byte[] data) {
+        this.data = data;
     }
 
     @Override
     public int stringLength() {
-        return data.length() + String.valueOf(data.length()).length() + 1;
+        return data.length + String.valueOf(data.length).length() + 1;
     }
 
 
@@ -22,7 +22,7 @@ public class BdecodedString implements BdecodedObject{
 
     @Override
     public Object toJavaObject() {
-        return data;
+        return new String(data,StandardCharsets.ISO_8859_1);
     }
 
     @Override
@@ -32,9 +32,8 @@ public class BdecodedString implements BdecodedObject{
 
     @Override
     public String bencode() {
-        byte[] bytes = data.getBytes(StandardCharsets.ISO_8859_1);
-        return String.valueOf(bytes.length) +
+        return String.valueOf(data.length) +
                 ':' +
-                new String(bytes,StandardCharsets.ISO_8859_1);
+                new String(data,StandardCharsets.ISO_8859_1);
     }
 }

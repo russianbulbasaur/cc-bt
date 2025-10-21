@@ -1,4 +1,5 @@
 package bdecode;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -44,7 +45,7 @@ public class BdecodedDictionary implements BdecodedObject {
          StringBuilder output = new StringBuilder();
          output.append('d');
          for(String key : data.keySet()) {
-             output.append((new BdecodedString(key)).bencode());
+             output.append((new BdecodedString(key.getBytes(StandardCharsets.ISO_8859_1))).bencode());
              output.append(data.get(key).bencode());
          }
          output.append('e');

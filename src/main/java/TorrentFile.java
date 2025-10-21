@@ -1,14 +1,8 @@
-package torrent_parser;
-
 import bdecode.*;
-import utils.ByteSlice;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,15 +17,16 @@ public class TorrentFile {
     private Bdecoder decoder = new Bdecoder();
     public Map<String,Object> data;
     public Map<String,Object> info;
-    public BdecodedObject infoBdecoded;
     public String trackerURL;
     public BigInteger length;
     public BigInteger pieceLength;
+    public String infoHash;
+    public byte[] infoHashBytes;
     public List<String> hashes;
     public TorrentFile(String filePath) throws IOException,FileNotFoundException {
         byte[] data = Files.readAllBytes(Path.of(filePath));
         BdecodedObject object = decoder.decode(data);
-        infoBdecoded = (BdecodedObject) (((Map<String,BdecodedObject>)object.data()).get("info"));
+        BdecodedDictionary infoBdecoded = (BdecodedDictionary) (((Map<String,BdecodedObject>)object.data()).get("info"));
         this.data = (Map<String,Object>)object.toJavaObject();
         trackerURL = (String) this.data.get("announce");
         info = ((Map<String,Object>)this.data.get("info"));
@@ -47,15 +42,21 @@ public class TorrentFile {
             }
             this.hashes.add(b.toString());
         }
+        infoHash = calculateInfoHash(infoBdecoded.bencode());
+        System.out.printf("Tracker URL: %s\n",trackerURL);
+        System.out.printf("Length: %d\n",length);
+        System.out.printf("Info Hash: %s\n",infoHash);
+        System.out.printf("Piece Length: %d\n",pieceLength);
     }
 
 
-    public String infoHash(String input) {
+    private String calculateInfoHash(String input) {
         try {
+
             MessageDigest md = MessageDigest.getInstance("SHA-1");
-            byte[] digest = md.digest(input.getBytes(StandardCharsets.UTF_8));
+            infoHashBytes = md.digest(input.getBytes(StandardCharsets.ISO_8859_1));
             // Java 17+: HexFormat
-            return java.util.HexFormat.of().formatHex(digest);
+            return java.util.HexFormat.of().formatHex(infoHashBytes);
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("SHA-1 not available", e);
         }
