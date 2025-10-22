@@ -1,6 +1,8 @@
 import bdecode.BdecodedObject;
 import bdecode.Bdecoder;
 import com.google.gson.Gson;
+import peer.handshake.Handshake;
+import peer.handshake.HandshakeMaker;
 import peer.Peer;
 import tracker.TrackerRequest;
 import tracker.TrackerResponse;
@@ -8,6 +10,7 @@ import tracker.TrackerResponse;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 // import com.dampcake.bencode.Bencode; - available if you need it!
 
 public class Main {
@@ -20,19 +23,30 @@ public class Main {
     } else if(command.equals("info")) {
         TorrentFile file = new TorrentFile(args[1]);
     }else if(command.equals("peers")){
-        TrackerRequest.Builder requestBuilder = getBuilder(args);
+        TorrentFile file = new TorrentFile(args[1]);
+        TrackerRequest.Builder requestBuilder = getBuilder(file);
         TrackerResponse response = requestBuilder.build().doRequest();
         for(Peer peer : response.getPeerList()) {
             peer.display();
         }
+    }else if(command.equals("handshake")) {
+        TorrentFile file = new TorrentFile(args[1]);
+        TrackerRequest.Builder requestBuilder = getBuilder(file);
+        TrackerResponse response = requestBuilder.build().doRequest();
+        List<Peer> peers = response.getPeerList();
+        if(peers.isEmpty()) throw new RuntimeException("peer list is empty");
+        Handshake handshake = HandshakeMaker.connect(peers.getFirst(),new Handshake((byte)19,
+                "BitTorrent protocol",
+                0,
+                file.infoHashBytes));
+        System.out.printf("Peer ID: %s\n",handshake.peerId);
     }else{
       System.out.println("Unknown command: " + command);
     }
 
   }
 
-    private static TrackerRequest.Builder getBuilder(String[] args) throws IOException {
-        TorrentFile file = new TorrentFile(args[1]);
+    private static TrackerRequest.Builder getBuilder(TorrentFile file) throws IOException {
         TrackerRequest.Builder requestBuilder = new TrackerRequest.Builder();
         requestBuilder.setURL(file.trackerURL);
         requestBuilder.setInfoHash(URLEncoder.encode(new String(file.infoHashBytes,

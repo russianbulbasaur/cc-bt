@@ -10,16 +10,15 @@ public class Peer {
         this.port = port;
     }
 
-    Inet4Address getIP() {
+    public void display() {
+        System.out.printf("%s:%d\n",ip.getHostAddress(),port);
+    }
+
+    public Inet4Address getIPAddress (){
         return ip;
     }
 
-    int getPort() {
+    public int getPort() {
         return port;
-    }
-
-
-    public void display() {
-        System.out.printf("%s:%d\n",ip.getHostAddress(),port);
     }
 }
